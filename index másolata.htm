@@ -1,0 +1,207 @@
+<!DOCTYPE HTML>
+
+<head>
+    <title>Weather App</title>
+    <meta name="author" content="Roland Banfi">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <p class="title">Weather App</p>
+        </div>
+    </header>
+    <section class="main">
+        <div class="container">
+            <div class="location">
+                <p>Hódmezővásárhely</p>
+            </div>
+            <div class="temp">
+                <p class="temp__num"></p>
+            </div>
+            <div class="weather">
+
+            </div>
+            <div class="min-max">
+                <span p class="min-max__min">12</span>
+                <span>/</span>
+                <span p class="min-max__max">14</span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <div class="forecast_hourly">
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <div class="forecast_daily">
+            </div>
+        </div>
+    </section>
+
+    <script>
+            var icons = new Array();
+            icons[1] = "https://developer.accuweather.com/sites/default/files/01-s.png";
+            icons[2] = "https://developer.accuweather.com/sites/default/files/02-s.png";
+            icons[3] = "https://developer.accuweather.com/sites/default/files/03-s.png";
+            icons[4] = "https://developer.accuweather.com/sites/default/files/04-s.png";
+            icons[5] = "https://developer.accuweather.com/sites/default/files/05-s.png";
+            icons[6] = "https://developer.accuweather.com/sites/default/files/05-s.png";
+            icons[7] = "https://developer.accuweather.com/sites/default/files/05-s.png";
+            icons[8] = "https://developer.accuweather.com/sites/default/files/05-s.png";
+            icons[9] = "https://developer.accuweather.com/sites/default/files/05-s.png";
+            icons[10] = "https://developer.accuweather.com/sites/default/files/05-s.png";
+            icons[11] = "https://developer.accuweather.com/sites/default/files/05-s.png";
+            icons[12] = "https://developer.accuweather.com/sites/default/files/05-s.png";
+            icons[13] = "https://developer.accuweather.com/sites/default/files/05-s.png";
+            icons[14] = "https://developer.accuweather.com/sites/default/files/05-s.png";
+
+        function loadCurrentWeather() {
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+
+                if (this.readyState === 4 && this.status === 200) {
+                    var currentData = JSON.parse(this.responseText);
+                    let currentTemp = currentData[0].Temperature.Metric.Value;
+                    let currentWeather = currentData[0].WeatherText;
+                    let icon = icons[currentData.WeatherIcon];
+
+                   
+
+                    document.getElementsByClassName("temp__num")[0].innerHTML = currentTemp + '°';
+                    document.getElementsByClassName("weather")[0].innerHTML = currentWeather;
+                }
+            }
+
+            xhttp.open("GET", "http://dataservice.accuweather.com//currentconditions/v1/187684?apikey=wo8dGPxwRfk33Pd46YZiMmSisAesF70u&language=HU-hu&details=true");
+            xhttp.send();
+        }
+
+        function loadForecast() {
+            var nyusz = new XMLHttpRequest();
+
+            nyusz.onreadystatechange = function () {
+                if (this.readyState === 4 && this.status === 200) {
+                    var forecastData = JSON.parse(this.responseText);
+                    var forecastHTML = '';
+
+
+                    forecastData.forEach(function (element) {
+
+                        var forecastTime = new Date(element.DateTime);
+                        var forecastHour = forecastTime.getHours();
+                        var forecastTemp = element.Temperature.Value;
+
+                        forecastHTML += drawCard(forecastHour, forecastTemp);
+                    });
+
+                    document.getElementsByClassName("forecast_hourly")[0].innerHTML = forecastHTML;
+                };
+            };
+
+            nyusz.open("GET", "http://dataservice.accuweather.com/forecasts/v1/hourly/12hour/187684?apikey=wo8dGPxwRfk33Pd46YZiMmSisAesF70u&language=hu-HU&details=true&metric=true");
+            nyusz.send();
+        };
+
+        function drawCard(time, temp) {
+
+            var forecastHTML = '';
+
+            forecastHTML += '<div class="forecast_hourly__card">'
+
+            forecastHTML += '<div class="forecast_hourly__card__time">';
+            forecastHTML += time + '.00';
+            forecastHTML += '</div>';
+
+            forecastHTML += '<div class="forecast_hourly__card__temp">';
+            forecastHTML += temp + '°';
+            forecastHTML += '</div>';
+
+            forecastHTML += '</div>'
+
+            return forecastHTML;
+        };
+
+        function loadDaily() {
+            var nyuf = new XMLHttpRequest();
+
+            nyuf.onreadystatechange = function () {
+                if (this.readyState === 4 && this.status === 200) {
+                    var dailyData = JSON.parse(this.responseText);
+                    var dailyForecast = dailyData.DailyForecasts;
+                    var dailyHTML = '';
+
+                    console.log(dailyForecast);
+
+                    dailyForecast.forEach(function (element) {
+                        var dailyTime = new Date(element.Date);
+                        var month = new Array();
+                        month[0] = "Jan";
+                        month[1] = "Feb";
+                        month[2] = "Mar";
+                        month[3] = "Apr";
+                        month[4] = "May";
+                        month[5] = "Jun";
+                        month[6] = "Jul";
+                        month[7] = "Aug";
+                        month[8] = "Sep";
+                        month[9] = "Oct";
+                        month[10] = "Nov";
+                        month[11] = "Dec";
+
+                        var monthName = month[dailyTime.getMonth()];
+                        var dailyDate = monthName + " " + dailyTime.getDate();
+
+                        var dailyTempMin = element.Temperature.Minimum.Value;
+                        var dailyTempMax = element.Temperature.Maximum.Value;
+
+                        dailyHTML += drawRow(dailyDate, dailyTempMax, dailyTempMin);
+                        console.log(dailyDate, dailyTempMin, dailyTempMax);
+                    });
+                    document.getElementsByClassName("forecast_daily")[0].innerHTML = dailyHTML;
+                };
+            };
+
+            nyuf.open("GET", "http://dataservice.accuweather.com/forecasts/v1/daily/5day/187684?apikey=wo8dGPxwRfk33Pd46YZiMmSisAesF70u&language=hu-HU&details=true&metric=true");
+            nyuf.send();
+        }
+
+        function drawRow(time, tempMax, tempMin) {
+            var dailyHTML = '';
+
+            dailyHTML += "<div class = forecast_daily__row>";
+
+            dailyHTML += "<span class = forecast_daily__row__date>";
+            dailyHTML += time;
+            dailyHTML += "</span>";
+
+            dailyHTML += "<span class = forecast_daily__row__temp>"
+            dailyHTML += "<span class = forecast_daily__row__tempMax>";
+            dailyHTML += tempMax + "°";
+            dailyHTML += "</span>";
+            dailyHTML += "/";
+            dailyHTML += "<span class = forecast_daily__row__tempMin>";
+            dailyHTML += tempMin + "°";
+            dailyHTML += "</span>";
+            dailyHTML += "</span>";
+
+            dailyHTML += "</div>";
+
+            return dailyHTML;
+        }
+
+        loadCurrentWeather();
+        loadForecast();
+        loadDaily();
+
+    </script>
+</body>
